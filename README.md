@@ -4,7 +4,7 @@ An visual editor for vue(2.x)
 
 ## Screenshots
 
-![Main UI](https://github.com/guobinnew/vscode-troll/tree/master/screenshots/mainui.png)\
+![image](https://github.com/guobinnew/vscode-troll/tree/master/screenshots/mainui.png?raw=true)
 
 ## Installation
 
