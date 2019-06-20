@@ -10,6 +10,7 @@
   "categories": [
     "Other"
   ],
+  "icon": "images/troll.png",
   "activationEvents": [
     "onCommand:extension.troll"
   ],
@@ -53,5 +54,9 @@
     "eslint": "^5.13.0",
     "typescript": "^3.3.1",
     "vscode": "^1.1.28"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/guobinnew/vscode-troll"
   }
 }
