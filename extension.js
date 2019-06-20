@@ -3,6 +3,7 @@
 const vscode = require('vscode');
 const path = require('path');
 const fs = require('fs');
+const crc32 = require('./crc32');
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -51,9 +52,26 @@ const messageHandlers = {
 		vscode.window.showErrorMessage(message.info)
 	},
 	loadfile(context, message) {
-		let vue = fs.readFileSync(context.uri.path, 'utf-8')
-		invokeCallback(context.panel, message, {code: 0, content: vue})
-	}
+		let res = {}
+		res.code = fs.readFileSync(context.uri.path, 'utf-8')
+		// CRC32
+		res.crc = crc32.str(res.code)
+		invokeCallback(context.panel, message, {code: 0, result: res})
+	},
+	savefile(context, message) {
+		let code = fs.readFileSync(context.uri.path, 'utf-8')
+		let codecrc = crc32.str(code)
+		console.log(context.uri.path, codecrc, message.info.crc)
+		if (codecrc !== message.info.crc) {
+			vscode.window.showErrorMessage('Save Failed: CRC failed!')
+			return
+		}
+
+		// 写入新代码
+		fs.writeFileSync(context.uri.path, message.info.code, 'utf-8')
+		let newcrc = crc32.str(message.info.code)
+		invokeCallback(context.panel, message, {code: 0, result: newcrc})
+	},
 }
 
 const panelMaps = new Map()

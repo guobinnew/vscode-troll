@@ -7,6 +7,9 @@
 			"es6"
 		]
 	},
+	"include": [
+		"crc32.js"
+  ],
 	"exclude": [
 		"node_modules"
 	]
