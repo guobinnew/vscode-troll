@@ -1,8 +1,15 @@
 # Changelog
+
+## v0.0.9
+
+### Description
+* open Help in external browser.
+* optimizing GUI.
+  
 ## v0.0.8
 
 ### Description
-* Optimizing GUI.
+* optimizing GUI.
 * fix some bugs.
   
 ## v0.0.7
@@ -14,4 +21,4 @@
 ## v0.0.5
 
 ### Description
-* First version.
+* first version.

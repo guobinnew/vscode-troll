@@ -84,6 +84,9 @@ const messageHandlers = {
 	error(context, message) {
 		vscode.window.showErrorMessage(message.info)
 	},
+	openurl(context, message) {
+	  vscode.env.openExternal(vscode.Uri.parse(message.info))
+	},
 	opendoc(context, message) {
 		vscode.window.showTextDocument(context.uri)
 	},
@@ -101,43 +104,56 @@ const messageHandlers = {
 	},
 	savefile(context, message) {
 		let res = readVue(context.uri)
+
+		// 写入文件
+		const writefile = () => {
+			// 只替换<template>部分，其余部分保持原样
+			let source = message.info.code
+			for (let child of res.document.childNodes) {
+				if (child.tagName === 'template') {
+					continue
+				}
+
+				if (child.nodeName === '#text') {
+					source += child.value
+				} else {
+					let props = ''
+					for (let p of child.attrs) {
+						props += ' ' + p.name + (p.value.length > 0 ? `="${p.value}"` : '')
+					}
+					source += `<${child.tagName} ${props}>${parse5.serialize(child)}</${child.tagName}>`
+				}
+			}
+
+			// 写入新代码
+			fs.writeFileSync(context.uri.path, source, 'utf-8')
+			// 计算新CRC
+			res = readVue(context.uri)
+			if (panelMaps.has(context.uri.path)) {
+				const panelcontext = panelMaps.get(context.uri.path)
+				panelcontext.lastcrc = res.crc
+			}
+
+			invokeCallback(context.panel, message, {
+				code: 0,
+				result: res.crc
+			})
+			vscode.window.showInformationMessage('Write file successfully!')
+		}
+
 		if (res.crc !== message.info.crc && message.info.forced !== true) {
 			// CRC检查失败
 			//vscode.window.showErrorMessage('CRC failed in the file（.vue)!')
 			// 强制更新
-			invokeCallback(context.panel, message, {code: 1, result: {}})
+			//invokeCallback(context.panel, message, {code: 1, result: {}})
+			vscode.window.showInformationMessage('Vue template have been modified, whether to force overwrite it？', {modal: true}, 'Yes').then((result) => {
+				if (result === 'Yes') {
+					writefile()
+				} 
+			});
 			return
-		}
-
-		// 只替换<template>部分，其余部分保持原样
-		let source = message.info.code
-		for(let child of res.document.childNodes){
-			if (child.tagName === 'template') {
-				continue
-			}
-
-			if (child.nodeName === '#text') {
-				source += child.value
-			} else {
-				let props = ''
-				for(let p of child.attrs) {
-					props += ' ' + p.name + (p.value.length > 0 ? `="${p.value}"` : '')
-				}
-				source += `<${child.tagName} ${props}>${parse5.serialize(child)}</${child.tagName}>`
-			}
-		}
-		
-		// 写入新代码
-		fs.writeFileSync(context.uri.path, source, 'utf-8')
-		// 计算新CRC
-		res = readVue(context.uri)
-		if (panelMaps.has(context.uri.path)) {
-			const panelcontext = panelMaps.get(context.uri.path)
-			panelcontext.lastcrc = res.crc
-		}
-
-		invokeCallback(context.panel, message, {code: 0, result: res.crc})
-		vscode.window.showInformationMessage('Write file successfully!')
+		} 
+		writefile()
 	},
 }
 /**
@@ -194,7 +210,7 @@ function activate(context) {
 					let res = readVue(panelctx.uri)
 					if (res.crc !== panelctx.lastcrc) {
 						// CRC检查失败
-						vscode.window.showErrorMessage('Vue file have been modified, please reload file!')
+						vscode.window.showWarningMessage('Vue file have been modified, please reload file!')
 						return
 					}
 				}
