@@ -126,7 +126,8 @@ const messageHandlers = {
 			}
 
 			// 写入新代码
-			fs.writeFileSync(context.uri.path, source, 'utf-8')
+			let filepath = context.uri.fsPath || context.uri.path
+			fs.writeFileSync(filepath, source, 'utf-8')
 			// 计算新CRC
 			res = readVue(context.uri)
 			if (panelMaps.has(context.uri.path)) {
@@ -142,10 +143,6 @@ const messageHandlers = {
 		}
 
 		if (res.crc !== message.info.crc && message.info.forced !== true) {
-			// CRC检查失败
-			//vscode.window.showErrorMessage('CRC failed in the file（.vue)!')
-			// 强制更新
-			//invokeCallback(context.panel, message, {code: 1, result: {}})
 			vscode.window.showInformationMessage('Vue template have been modified, whether to force overwrite it？', {modal: true}, 'Yes').then((result) => {
 				if (result === 'Yes') {
 					writefile()

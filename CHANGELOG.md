@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.0.10
+
+### Description
+* fix 'write vue file failed' in windows env.
+
 ## v0.0.9
 
 ### Description
