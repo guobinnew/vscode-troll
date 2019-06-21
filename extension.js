@@ -33,7 +33,6 @@ function getWebViewContent(context, templatePath) {
  * @param {*} resp 
  */
 function invokeCallback(panel, message, result) {
-	console.log('回调消息：', result)
 	// 错误码在400-600之间的，默认弹出错误提示
 	if (typeof result == 'object' && result.code && result.code >= 400 && result.code < 600) {
 			vscode.window.showErrorMessage(result.message || '发生未知错误！')
@@ -89,10 +88,15 @@ const messageHandlers = {
 	},
 	loadfile(context, message) {
 		let res = readVue(context.uri.path)
+		if (panelMaps.has(context.uri.path)) {
+			const panelcontext = panelMaps.get(context.uri.path)
+			panelcontext.lastcrc = res.crc
+		}
 		invokeCallback(context.panel, message, {code: 0, result: {
 			code: res.code,
 			crc: res.crc
 		}})
+		vscode.window.showInformationMessage('Load file successfully!')
 	},
 	savefile(context, message) {
 		let res = readVue(context.uri.path)
@@ -124,8 +128,14 @@ const messageHandlers = {
 		
 		// 写入新代码
 		fs.writeFileSync(context.uri.path, source, 'utf-8')
-		let newcrc = crc32.str(message.info.code)
-		invokeCallback(context.panel, message, {code: 0, result: newcrc})
+		// 计算新CRC
+		res = readVue(context.uri.path)
+		if (panelMaps.has(context.uri.path)) {
+			const panelcontext = panelMaps.get(context.uri.path)
+			panelcontext.lastcrc = res.crc
+		}
+
+		invokeCallback(context.panel, message, {code: 0, result: res.crc})
 		vscode.window.showInformationMessage('Write file successfully!')
 	},
 }
@@ -136,7 +146,7 @@ function activate(context) {
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "troll" is now active!');
+	console.log('Congratulations, extension "Troll" is now active!')
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with  registerCommand
@@ -171,15 +181,29 @@ function activate(context) {
 			if (messageHandlers[message.cmd]) {
 					messageHandlers[message.cmd](panelctx, message)
 			} else {
-				vscode.window.showErrorMessage(`未找到名为 ${message.cmd} 回调方法!`)
+				vscode.window.showErrorMessage(`Can't find ${message.cmd} callback!`)
 			}
 		}, null, context.subscriptions)
 
 		panelMaps.set(uri.path, panelctx)
+		panelctx.panel.onDidChangeViewState(
+			(e) => {
+				if (panelctx.panel.visible){
+					// 检查CRC是否改变
+					let res = readVue(panelctx.uri.path)
+					if (res.crc !== panelctx.lastcrc) {
+						// CRC检查失败
+						vscode.window.showErrorMessage('Vue file have been modified, please reload file!')
+						return
+					}
+				}
+			},
+			null,
+      context.subscriptions
+		)
 		panelctx.panel.onDidDispose(
 			() => {
 				// When the panel is closed, cancel any future updates to the webview content
-				console.log('panel dispose--------', panelctx.uri.path)
 				panelMaps.delete(panelctx.uri.path)
 			},
 			null,
