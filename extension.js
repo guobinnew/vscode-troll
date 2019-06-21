@@ -3,8 +3,10 @@
 const vscode = require('vscode');
 const path = require('path');
 const fs = require('fs');
-const crc32 = require('./crc32');
+const crc32 = require('./libs/crc32');
+const parse5 = require('./libs/parse5/lib/index');
 
+const panelMaps = new Map()
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 
@@ -40,6 +42,37 @@ function invokeCallback(panel, message, result) {
 }
 
 /**
+ * 
+ * @param {*} path 
+ */
+function readVue(filepath) {
+	let res = {
+		code: '',
+		crc: 0
+	}
+	res.script = fs.readFileSync(filepath, 'utf-8')
+	res.document = parse5.parseFragment(res.script)
+
+	for(let child of res.document.childNodes){
+		if (child.tagName === 'template') {
+			let props = ''
+			for(let p of child.attrs) {
+				props += ' ' + p.name + (p.value.length > 0 ? `="${p.value}"` : '')
+			}
+			res.code = `<${child.tagName}${props}>${parse5.serialize(child.content)}</${child.tagName}>`
+			res.crc = crc32.str(res.code)
+			break
+		}
+	}
+
+	if(res.code === '') {
+		vscode.window.showErrorMessage('Error in file(.vue) format: missing <template>')
+	}
+
+	return res
+}
+
+/**
  * 存放所有消息回调函数，根据 message.cmd 来决定调用哪个方法
  */
 const messageHandlers = {
@@ -51,30 +84,51 @@ const messageHandlers = {
 	error(context, message) {
 		vscode.window.showErrorMessage(message.info)
 	},
+	opendoc(context, message) {
+		vscode.window.showTextDocument(context.uri)
+	},
 	loadfile(context, message) {
-		let res = {}
-		res.code = fs.readFileSync(context.uri.path, 'utf-8')
-		// CRC32
-		res.crc = crc32.str(res.code)
-		invokeCallback(context.panel, message, {code: 0, result: res})
+		let res = readVue(context.uri.path)
+		invokeCallback(context.panel, message, {code: 0, result: {
+			code: res.code,
+			crc: res.crc
+		}})
 	},
 	savefile(context, message) {
-		let code = fs.readFileSync(context.uri.path, 'utf-8')
-		let codecrc = crc32.str(code)
-		console.log(context.uri.path, codecrc, message.info.crc)
-		if (codecrc !== message.info.crc) {
-			vscode.window.showErrorMessage('Save Failed: CRC failed!')
+		let res = readVue(context.uri.path)
+		if (res.crc !== message.info.crc && message.info.forced !== true) {
+			// CRC检查失败
+			//vscode.window.showErrorMessage('CRC failed in the file（.vue)!')
+			// 强制更新
+			invokeCallback(context.panel, message, {code: 1, result: {}})
 			return
 		}
 
+		// 只替换<template>部分，其余部分保持原样
+		let source = message.info.code
+		for(let child of res.document.childNodes){
+			if (child.tagName === 'template') {
+				continue
+			}
+
+			if (child.nodeName === '#text') {
+				source += child.value
+			} else {
+				let props = ''
+				for(let p of child.attrs) {
+					props += ' ' + p.name + (p.value.length > 0 ? `="${p.value}"` : '')
+				}
+				source += `<${child.tagName} ${props}>${parse5.serialize(child)}</${child.tagName}>`
+			}
+		}
+		
 		// 写入新代码
-		fs.writeFileSync(context.uri.path, message.info.code, 'utf-8')
+		fs.writeFileSync(context.uri.path, source, 'utf-8')
 		let newcrc = crc32.str(message.info.code)
 		invokeCallback(context.panel, message, {code: 0, result: newcrc})
+		vscode.window.showInformationMessage('Write file successfully!')
 	},
 }
-
-const panelMaps = new Map()
 /**
  * @param {vscode.ExtensionContext} context
  */
@@ -114,7 +168,6 @@ function activate(context) {
 		);
 		panelctx.panel.webview.html = getWebViewContent(context, 'static/index.html')
 		panelctx.panel.webview.onDidReceiveMessage((message) => {
-			console.log('-----', message)
 			if (messageHandlers[message.cmd]) {
 					messageHandlers[message.cmd](panelctx, message)
 			} else {
@@ -122,10 +175,11 @@ function activate(context) {
 			}
 		}, null, context.subscriptions)
 
-		panelMaps.set(uri.path, panelctx.panel)
+		panelMaps.set(uri.path, panelctx)
 		panelctx.panel.onDidDispose(
 			() => {
 				// When the panel is closed, cancel any future updates to the webview content
+				console.log('panel dispose--------', panelctx.uri.path)
 				panelMaps.delete(panelctx.uri.path)
 			},
 			null,
@@ -138,6 +192,7 @@ exports.activate = activate;
 
 // this method is called when your extension is deactivated
 function deactivate() {
+	panelMaps.clear()
 }
 
 module.exports = {
