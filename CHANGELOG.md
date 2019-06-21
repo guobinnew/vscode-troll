@@ -1,9 +1,6 @@
-# Change Log
+# Changelog
+## v0.0.5
 
-All notable changes to the "troll" extension will be documented in this file.
-
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
-
-- Initial release
+### Description
+# Description
+* First version.
