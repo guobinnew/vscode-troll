@@ -44,11 +44,12 @@ function invokeCallback(panel, message, result) {
  * 
  * @param {*} path 
  */
-function readVue(filepath) {
+function readVue(uri) {
 	let res = {
 		code: '',
 		crc: 0
 	}
+	let filepath = uri.fsPath || uri.path
 	res.script = fs.readFileSync(filepath, 'utf-8')
 	res.document = parse5.parseFragment(res.script)
 
@@ -87,7 +88,7 @@ const messageHandlers = {
 		vscode.window.showTextDocument(context.uri)
 	},
 	loadfile(context, message) {
-		let res = readVue(context.uri.path)
+		let res = readVue(context.uri)
 		if (panelMaps.has(context.uri.path)) {
 			const panelcontext = panelMaps.get(context.uri.path)
 			panelcontext.lastcrc = res.crc
@@ -99,7 +100,7 @@ const messageHandlers = {
 		vscode.window.showInformationMessage('Load file successfully!')
 	},
 	savefile(context, message) {
-		let res = readVue(context.uri.path)
+		let res = readVue(context.uri)
 		if (res.crc !== message.info.crc && message.info.forced !== true) {
 			// CRC检查失败
 			//vscode.window.showErrorMessage('CRC failed in the file（.vue)!')
@@ -129,7 +130,7 @@ const messageHandlers = {
 		// 写入新代码
 		fs.writeFileSync(context.uri.path, source, 'utf-8')
 		// 计算新CRC
-		res = readVue(context.uri.path)
+		res = readVue(context.uri)
 		if (panelMaps.has(context.uri.path)) {
 			const panelcontext = panelMaps.get(context.uri.path)
 			panelcontext.lastcrc = res.crc
@@ -190,7 +191,7 @@ function activate(context) {
 			(e) => {
 				if (panelctx.panel.visible){
 					// 检查CRC是否改变
-					let res = readVue(panelctx.uri.path)
+					let res = readVue(panelctx.uri)
 					if (res.crc !== panelctx.lastcrc) {
 						// CRC检查失败
 						vscode.window.showErrorMessage('Vue file have been modified, please reload file!')
