@@ -1,8 +1,6 @@
 <!--pages/chinese/player/player.wxml-->
 <view class="container">
 <view class="title"><text>听写</text></view>
-<view></view>
-
 
 <view class="progress">
 <text class="progress-text">{{progressText}}</text>
