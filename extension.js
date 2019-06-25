@@ -44,31 +44,14 @@ function invokeCallback(panel, message, result) {
  * 
  * @param {*} path 
  */
-function readVue(uri) {
+function readWxml(uri) {
 	let res = {
 		code: '',
 		crc: 0
 	}
 	let filepath = uri.fsPath || uri.path
-	res.script = fs.readFileSync(filepath, 'utf-8')
-	res.document = parse5.parseFragment(res.script)
-
-	for(let child of res.document.childNodes){
-		if (child.tagName === 'template') {
-			let props = ''
-			for(let p of child.attrs) {
-				props += ' ' + p.name + (p.value.length > 0 ? `="${p.value}"` : '')
-			}
-			res.code = `<${child.tagName}${props}>${parse5.serialize(child.content)}</${child.tagName}>`
-			res.crc = crc32.str(res.code)
-			break
-		}
-	}
-
-	if(res.code === '') {
-		vscode.window.showErrorMessage('Error in file(.vue) format: missing <template>')
-	}
-
+	res.code = fs.readFileSync(filepath, 'utf-8')
+	res.crc = crc32.str(res.code)
 	return res
 }
 
@@ -91,7 +74,7 @@ const messageHandlers = {
 		vscode.window.showTextDocument(context.uri)
 	},
 	loadfile(context, message) {
-		let res = readVue(context.uri)
+		let res = readWxml(context.uri)
 		if (panelMaps.has(context.uri.path)) {
 			const panelcontext = panelMaps.get(context.uri.path)
 			panelcontext.lastcrc = res.crc
@@ -103,47 +86,31 @@ const messageHandlers = {
 		vscode.window.showInformationMessage('Load file successfully!')
 	},
 	savefile(context, message) {
-		let res = readVue(context.uri)
+		let res = readWxml(context.uri)
 
 		// 写入文件
 		const writefile = () => {
 			// 只替换<template>部分，其余部分保持原样
 			let source = message.info.code
-			for (let child of res.document.childNodes) {
-				if (child.tagName === 'template') {
-					continue
-				}
-
-				if (child.nodeName === '#text') {
-					source += child.value
-				} else {
-					let props = ''
-					for (let p of child.attrs) {
-						props += ' ' + p.name + (p.value.length > 0 ? `="${p.value}"` : '')
-					}
-					source += `<${child.tagName} ${props}>${parse5.serialize(child)}</${child.tagName}>`
-				}
-			}
-
 			// 写入新代码
 			let filepath = context.uri.fsPath || context.uri.path
 			fs.writeFileSync(filepath, source, 'utf-8')
 			// 计算新CRC
-			res = readVue(context.uri)
+			let newcrc = crc32.str(res.code)
 			if (panelMaps.has(context.uri.path)) {
 				const panelcontext = panelMaps.get(context.uri.path)
-				panelcontext.lastcrc = res.crc
+				panelcontext.lastcrc = newcrc
 			}
 
 			invokeCallback(context.panel, message, {
 				code: 0,
-				result: res.crc
+				result: newcrc
 			})
 			vscode.window.showInformationMessage('Write file successfully!')
 		}
 
 		if (res.crc !== message.info.crc && message.info.forced !== true) {
-			vscode.window.showInformationMessage('Vue template have been modified, whether to force overwrite it？', {modal: true}, 'Yes').then((result) => {
+			vscode.window.showInformationMessage('Wxml file have been modified, whether to force overwrite it？', {modal: true}, 'Yes').then((result) => {
 				if (result === 'Yes') {
 					writefile()
 				} 
@@ -160,12 +127,12 @@ function activate(context) {
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, extension "Troll" is now active!')
+	console.log('Congratulations, extension "Troll for wxml" is now active!')
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with  registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('extension.troll', function (uri) {
+	let disposable = vscode.commands.registerCommand('extension.trollwxml', function (uri) {
 		// The code you place here will be executed every time your command is executed
 		if (panelMaps.has(uri.path)) {
 			// 激活panel
@@ -176,7 +143,7 @@ function activate(context) {
 
 		let panelctx = {
 			uri: uri,
-			filename: path.basename(uri.path, '.vue')
+			filename: path.basename(uri.path, '.wxml')
 		}
 
 		// Display a message box to the user
@@ -204,10 +171,10 @@ function activate(context) {
 			(e) => {
 				if (panelctx.panel.visible){
 					// 检查CRC是否改变
-					let res = readVue(panelctx.uri)
+					let res = readWxml(panelctx.uri)
 					if (res.crc !== panelctx.lastcrc) {
 						// CRC检查失败
-						vscode.window.showWarningMessage('Vue file have been modified, please reload file!')
+						vscode.window.showWarningMessage('Wxml file have been modified, please reload file!')
 						return
 					}
 				}

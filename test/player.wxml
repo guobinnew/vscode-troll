@@ -1,0 +1,34 @@
+<!--pages/chinese/player/player.wxml-->
+<view class="container">
+<view class="title"><text>听写</text></view>
+<view></view>
+
+
+<view class="progress">
+<text class="progress-text">{{progressText}}</text>
+<progress percent="{{progressPercent}}" stroke-width="12" border-radius="6" show-info="{{true}}"/>
+</view>
+<view class="speed">
+<text>朗读语速</text>
+<view wx:for="{{speeds}}" wx:key="index" data-id="{{index}}" class="{{'speed-item ' + (currentSpeed === index ? 'speed-item-sel' : '')}}" bindtap="bindSpeedTap">
+<text class="speed-item-text">{{item.title}}</text>
+</view>
+</view>
+<view class="control">
+<button class="btn" type="info" bindtap="bindRestartTap">重新开始</button>
+<button class="btn" type="primary" bindtap="bindPrevTap">上一个</button>
+<button class="btn" type="primary" bindtap="bindNextTap">下一个</button>
+</view>
+<view class="answer">
+<text class="answer-text" style="display: {{showAnswer ? 'inline' : 'none'}}">{{word}}</text>
+</view>
+<view class="control">
+<button class="btn" type="primary" bindtap="bindAgainTap">重读一遍</button>
+<button class="btn" type="warn" bindtap="bindAnswerTap">查看单词</button>
+<button class="btn" type="info" bindtap="bindListTap">检查答案</button>
+</view>
+<view class="list" style="display: {{showList ? 'inline' : 'none'}}">
+<text wx:for="{{list}}" wx:key="index" class="list-text">{{index + 1}}.{{item}}</text>
+</view>
+
+</view>

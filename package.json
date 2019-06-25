@@ -1,8 +1,8 @@
 {
-  "name": "troll",
-  "displayName": "Troll For Vue",
-  "description": "An visual editor for Vue(2.x)",
-  "version": "0.0.12",
+  "name": "troll-wxml",
+  "displayName": "Troll For Wxml",
+  "description": "An visual editor for Weapp(.wxml)",
+  "version": "0.0.2",
   "publisher": "orionunique",
   "engines": {
     "vscode": "^1.34.0"
@@ -12,13 +12,13 @@
   ],
   "icon": "images/troll.png",
   "activationEvents": [
-    "onCommand:extension.troll"
+    "onCommand:extension.trollwxml"
   ],
   "main": "./extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "extension.troll",
+        "command": "extension.trollwxml",
         "title": "Open Troll Editor",
         "icon": {
           "light": "./images/trolley-light.svg",
@@ -29,15 +29,15 @@
     "menus": {
       "editor/title": [
         {
-          "when": "resourceLangId == vue",
-          "command": "extension.troll",
+          "when": "resourceLangId == wxml",
+          "command": "extension.trollwxml",
           "group": "navigation"
         }
       ],
       "explorer/context": [
         {
-          "when": "resourceLangId == vue",
-          "command": "extension.troll",
+          "when": "resourceLangId == wxml",
+          "command": "extension.trollwxml",
           "group": "navigation"
         }
       ]
