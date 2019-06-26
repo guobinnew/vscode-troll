@@ -1,5 +1,8 @@
 # Changelog
 
+##v0.0.14
+* add comment element.
+
 ## v0.0.11
 * optimizing GUI.
   
