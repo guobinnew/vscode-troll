@@ -44,7 +44,7 @@ function invokeCallback(panel, message, result) {
  * 
  * @param {*} path 
  */
-function readVue(uri) {
+function readUx(uri) {
 	let res = {
 		code: '',
 		crc: 0
@@ -66,7 +66,7 @@ function readVue(uri) {
 	}
 
 	if(res.code === '') {
-		vscode.window.showErrorMessage('Error in file(.vue) format: missing <template>')
+		vscode.window.showErrorMessage('Error in file(.ux) format: missing <template>')
 	}
 
 	return res
@@ -91,7 +91,7 @@ const messageHandlers = {
 		vscode.window.showTextDocument(context.uri)
 	},
 	loadfile(context, message) {
-		let res = readVue(context.uri)
+		let res = readUx(context.uri)
 		if (panelMaps.has(context.uri.path)) {
 			const panelcontext = panelMaps.get(context.uri.path)
 			panelcontext.lastcrc = res.crc
@@ -103,7 +103,7 @@ const messageHandlers = {
 		vscode.window.showInformationMessage('Load file successfully!')
 	},
 	savefile(context, message) {
-		let res = readVue(context.uri)
+		let res = readUx(context.uri)
 
 		// 写入文件
 		const writefile = () => {
@@ -116,6 +116,8 @@ const messageHandlers = {
 
 				if (child.nodeName === '#text') {
 					source += child.value
+				} if (child.nodeName === '#comment') {
+					source += `<!-- ${child.value} -->`
 				} else {
 					let props = ''
 					for (let p of child.attrs) {
@@ -129,7 +131,7 @@ const messageHandlers = {
 			let filepath = context.uri.fsPath || context.uri.path
 			fs.writeFileSync(filepath, source, 'utf-8')
 			// 计算新CRC
-			res = readVue(context.uri)
+			res = readUx(context.uri)
 			if (panelMaps.has(context.uri.path)) {
 				const panelcontext = panelMaps.get(context.uri.path)
 				panelcontext.lastcrc = res.crc
@@ -143,7 +145,7 @@ const messageHandlers = {
 		}
 
 		if (res.crc !== message.info.crc && message.info.forced !== true) {
-			vscode.window.showInformationMessage('Vue template have been modified, whether to force overwrite it？', {modal: true}, 'Yes').then((result) => {
+			vscode.window.showInformationMessage('Ux template have been modified, whether to force overwrite it？', {modal: true}, 'Yes').then((result) => {
 				if (result === 'Yes') {
 					writefile()
 				} 
@@ -160,12 +162,12 @@ function activate(context) {
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, extension "Troll" is now active!')
+	console.log('Congratulations, extension "Troll for ux" is now active!')
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with  registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('extension.troll', function (uri) {
+	let disposable = vscode.commands.registerCommand('extension.trollux', function (uri) {
 		// The code you place here will be executed every time your command is executed
 		if (panelMaps.has(uri.path)) {
 			// 激活panel
@@ -176,7 +178,7 @@ function activate(context) {
 
 		let panelctx = {
 			uri: uri,
-			filename: path.basename(uri.path, '.vue')
+			filename: path.basename(uri.path, '.ux')
 		}
 
 		// Display a message box to the user
@@ -204,10 +206,10 @@ function activate(context) {
 			(e) => {
 				if (panelctx.panel.visible){
 					// 检查CRC是否改变
-					let res = readVue(panelctx.uri)
+					let res = readUx(panelctx.uri)
 					if (res.crc !== panelctx.lastcrc) {
 						// CRC检查失败
-						vscode.window.showWarningMessage('Vue file have been modified, please reload file!')
+						vscode.window.showWarningMessage('Ux file have been modified, please reload file!')
 						return
 					}
 				}
