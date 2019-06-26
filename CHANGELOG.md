@@ -1,6 +1,10 @@
 # Changelog
 
-##v0.0.14
+## v0.0.15
+* optimazing vue file parsing
+* fix a fatal bug
+
+## v0.0.14
 * add comment element.
 
 ## v0.0.11

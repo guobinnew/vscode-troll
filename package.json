@@ -2,7 +2,7 @@
   "name": "troll",
   "displayName": "Troll For Vue",
   "description": "An visual editor for Vue(2.x)",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "publisher": "orionunique",
   "engines": {
     "vscode": "^1.34.0"
