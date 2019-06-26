@@ -1,6 +1,9 @@
 # Changelog
 
-##v0.0.3
+## v0.0.4
+* add import && inlcude components
+
+## v0.0.3
 * fix bugs
 
 ## v0.0.2
