@@ -2,7 +2,7 @@
   "name": "troll-wxml",
   "displayName": "Troll For Wxml",
   "description": "An visual editor for Weapp(.wxml)",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "publisher": "orionunique",
   "engines": {
     "vscode": "^1.34.0"
@@ -16,6 +16,10 @@
   ],
   "main": "./extension.js",
   "contributes": {
+    "languages": [{
+      "id": "wxml",
+      "extensions": [ ".wxml" ]
+    }],
     "commands": [
       {
         "command": "extension.trollwxml",
