@@ -12,7 +12,7 @@
   ],
   "icon": "images/troll.png",
   "activationEvents": [
-    "onCommand:extension.trollux"
+    "*"
   ],
   "main": "./extension.js",
   "contributes": {
@@ -29,14 +29,14 @@
     "menus": {
       "editor/title": [
         {
-          "when": "resourceLangId == ux",
+          "when": "resourceLangId == plaintext",
           "command": "extension.trollux",
           "group": "navigation"
         }
       ],
       "explorer/context": [
         {
-          "when": "resourceLangId == ux",
+          "when": "resourceLangId == plaintext",
           "command": "extension.trollux",
           "group": "navigation"
         }

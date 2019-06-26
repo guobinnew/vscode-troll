@@ -51,7 +51,8 @@ function readUx(uri) {
 	}
 	let filepath = uri.fsPath || uri.path
 	res.script = fs.readFileSync(filepath, 'utf-8')
-	res.document = parse5.parseFragment(res.script)
+	
+	const document = parse5.parseFragment(res.script, {sourceCodeLocationInfo: true})
 
 	for(let child of res.document.childNodes){
 		if (child.tagName === 'template') {
@@ -164,6 +165,12 @@ function activate(context) {
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, extension "Troll for ux" is now active!')
 
+	vscode.workspace.onDidOpenTextDocument(
+		(e) => {
+			console.log('=======onDidOpenTextDocument=======', e)
+		}
+	)
+
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with  registerCommand
 	// The commandId parameter must match the command field in package.json
@@ -175,6 +182,9 @@ function activate(context) {
 			panelcontext.panel.reveal()
 			return
 		}
+
+		console.log('++++++++++uri+++++++', uri)
+		return
 
 		let panelctx = {
 			uri: uri,
