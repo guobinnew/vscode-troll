@@ -51,18 +51,15 @@ function readUx(uri) {
 	}
 	let filepath = uri.fsPath || uri.path
 	res.script = fs.readFileSync(filepath, 'utf-8')
-	
 	const document = parse5.parseFragment(res.script, {sourceCodeLocationInfo: true})
-
-	for(let child of res.document.childNodes){
+  res.sections = []
+	for(let child of document.childNodes){
 		if (child.tagName === 'template') {
-			let props = ''
-			for(let p of child.attrs) {
-				props += ' ' + p.name + (p.value.length > 0 ? `="${p.value}"` : '')
-			}
-			res.code = `<${child.tagName}${props}>${parse5.serialize(child.content)}</${child.tagName}>`
+			res.code = res.script.substring(child.sourceCodeLocation.startOffset, child.sourceCodeLocation.endOffset)
 			res.crc = crc32.str(res.code)
-			break
+		} else {
+			// 缓存其余部分
+			res.sections.push(res.script.substring(child.sourceCodeLocation.startOffset, child.sourceCodeLocation.endOffset))
 		}
 	}
 
@@ -110,32 +107,17 @@ const messageHandlers = {
 		const writefile = () => {
 			// 只替换<template>部分，其余部分保持原样
 			let source = message.info.code
-			for (let child of res.document.childNodes) {
-				if (child.tagName === 'template') {
-					continue
-				}
-
-				if (child.nodeName === '#text') {
-					source += child.value
-				} if (child.nodeName === '#comment') {
-					source += `<!-- ${child.value} -->`
-				} else {
-					let props = ''
-					for (let p of child.attrs) {
-						props += ' ' + p.name + (p.value.length > 0 ? `="${p.value}"` : '')
-					}
-					source += `<${child.tagName} ${props}>${parse5.serialize(child)}</${child.tagName}>`
-				}
+			for (let i=0; i<res.sections.length; i++) {
+				source += '\n' + res.sections[i]
 			}
-
 			// 写入新代码
 			let filepath = context.uri.fsPath || context.uri.path
 			fs.writeFileSync(filepath, source, 'utf-8')
 			// 计算新CRC
-			res = readUx(context.uri)
+			let newcrc = crc32(message.info.code)
 			if (panelMaps.has(context.uri.path)) {
 				const panelcontext = panelMaps.get(context.uri.path)
-				panelcontext.lastcrc = res.crc
+				panelcontext.lastcrc = newcrc
 			}
 
 			invokeCallback(context.panel, message, {
@@ -165,12 +147,6 @@ function activate(context) {
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, extension "Troll for ux" is now active!')
 
-	vscode.workspace.onDidOpenTextDocument(
-		(e) => {
-			console.log('=======onDidOpenTextDocument=======', e)
-		}
-	)
-
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with  registerCommand
 	// The commandId parameter must match the command field in package.json
@@ -182,9 +158,6 @@ function activate(context) {
 			panelcontext.panel.reveal()
 			return
 		}
-
-		console.log('++++++++++uri+++++++', uri)
-		return
 
 		let panelctx = {
 			uri: uri,
