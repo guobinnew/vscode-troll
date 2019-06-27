@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.0.6
+* add iView UI components.
+
 ## v0.0.4
 * add import && inlcude components
 
