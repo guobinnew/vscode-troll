@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.0.17
+* support pug(jade).
+
 ## v0.0.15
 * optimazing vue file parsing
 * fix a fatal bug
