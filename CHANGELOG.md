@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.0.18
+* fix a fatal drag&drop bug.
+
 ## v0.0.17
 * support pug(jade).
 
