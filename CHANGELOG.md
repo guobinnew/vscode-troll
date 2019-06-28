@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.0.7
+* add MinUI components.
+
 ## v0.0.6
 * add iView UI components.
 
