@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.0.8
+* fix a fatal drag&drop bug.
+
 ## v0.0.7
 * add MinUI components.
 
