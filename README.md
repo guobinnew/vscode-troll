@@ -1,6 +1,10 @@
 # Troll For WXML
 
-An visual editor for Weapp
+A visual editor for Weapp(.wxml)
+
+## Features
+* As a supplement to the text editor, it improves the development efficiency by dragging and dropping page elements.
+* Provide rich UI component libraries, such as iView, MinUI, Wux, etc.
 
 ## Screenshots
 
