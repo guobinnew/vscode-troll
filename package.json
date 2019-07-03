@@ -25,8 +25,8 @@
         "command": "extension.trollwxml.outline",
         "title": "Open Troll Preview",
         "icon": {
-          "light": "./images/trolley-light.svg",
-          "dark": "./images/trolley-dark.svg"
+          "light": "./images/trolley-dark.svg",
+          "dark": "./images/trolley-light.svg"
         }
       }
     ],

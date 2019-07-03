@@ -71,7 +71,16 @@ const messageHandlers = {
 	  vscode.env.openExternal(vscode.Uri.parse(message.info))
 	},
 	opendoc(context, message) {
-		vscode.window.showTextDocument(context.uri)
+		const options = {
+			preview: false,
+			viewColumn: vscode.ViewColumn.One
+		}
+
+		if (message.info) {
+			// 选中一整行
+			options.selection = new vscode.Range(new vscode.Position(message.info.startLine, 0), new vscode.Position(message.info.endLine + 1, 0))
+		}
+		vscode.window.showTextDocument(context.uri, options)
 	},
 	loadfile(context, message) {
 		let res = readWxml(context.uri)
