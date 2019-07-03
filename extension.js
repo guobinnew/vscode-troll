@@ -84,41 +84,7 @@ const messageHandlers = {
 			crc: res.crc
 		}})
 		vscode.window.showInformationMessage('Load file successfully!')
-	},
-	savefile(context, message) {
-		let res = readWxml(context.uri)
-
-		// 写入文件
-		const writefile = () => {
-			// 只替换<template>部分，其余部分保持原样
-			let source = message.info.code
-			// 写入新代码
-			let filepath = context.uri.fsPath || context.uri.path
-			fs.writeFileSync(filepath, source, 'utf-8')
-			// 计算新CRC
-			let newcrc = crc32.str(res.code)
-			if (panelMaps.has(context.uri.path)) {
-				const panelcontext = panelMaps.get(context.uri.path)
-				panelcontext.lastcrc = newcrc
-			}
-
-			invokeCallback(context.panel, message, {
-				code: 0,
-				result: newcrc
-			})
-			vscode.window.showInformationMessage('Write file successfully!')
-		}
-
-		if (res.crc !== message.info.crc && message.info.forced !== true) {
-			vscode.window.showInformationMessage('Wxml file have been modified, whether to force overwrite it？', {modal: true}, 'Yes').then((result) => {
-				if (result === 'Yes') {
-					writefile()
-				} 
-			});
-			return
-		} 
-		writefile()
-	},
+	}
 }
 /**
  * @param {vscode.ExtensionContext} context
@@ -127,12 +93,12 @@ function activate(context) {
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, extension "Troll for wxml" is now active!')
+	console.log('Congratulations, extension "Outline for wxml" is now active!')
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with  registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('extension.trollwxml', function (uri) {
+	let disposable = vscode.commands.registerCommand('extension.trollwxml.outline', function (uri) {
 		// The code you place here will be executed every time your command is executed
 		if (panelMaps.has(uri.path)) {
 			// 激活panel
@@ -149,8 +115,8 @@ function activate(context) {
 		// Display a message box to the user
 		// vscode.window.showInformationMessage('Hello World!');
 		panelctx.panel = vscode.window.createWebviewPanel(
-			'troll', // viewType
-			panelctx.filename + '.troll', // 视图标题
+			'outline', // viewType
+			panelctx.filename + '.outline', // 视图标题
 			vscode.ViewColumn.One, // 显示在编辑器的哪个部位
 			{
 					enableScripts: true, // 启用JS，默认禁用
@@ -173,7 +139,7 @@ function activate(context) {
 					// 检查CRC是否改变
 					let res = readWxml(panelctx.uri)
 					if (res.crc !== panelctx.lastcrc) {
-						// CRC检查失败
+						// 通知重新加载
 						vscode.window.showWarningMessage('Wxml file have been modified, please reload file!')
 						return
 					}

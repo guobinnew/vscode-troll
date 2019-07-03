@@ -1,8 +1,8 @@
 {
-  "name": "troll-wxml",
-  "displayName": "Troll For Wxml",
-  "description": "An visual editor for Weapp(.wxml)",
-  "version": "0.0.8",
+  "name": "troll-outline-wxml",
+  "displayName": "Outline For Wxml",
+  "description": "A visual preview for Weapp(.wxml)",
+  "version": "0.0.1",
   "publisher": "orionunique",
   "engines": {
     "vscode": "^1.34.0"
@@ -12,7 +12,7 @@
   ],
   "icon": "images/troll.png",
   "activationEvents": [
-    "onCommand:extension.trollwxml"
+    "onCommand:extension.trollwxml.outline"
   ],
   "main": "./extension.js",
   "contributes": {
@@ -22,11 +22,11 @@
     }],
     "commands": [
       {
-        "command": "extension.trollwxml",
-        "title": "Open Troll Editor",
+        "command": "extension.trollwxml.outline",
+        "title": "Open Troll Preview",
         "icon": {
           "light": "./images/trolley-light.svg",
-          "dark": "./images/trolley-light.svg"
+          "dark": "./images/trolley-dark.svg"
         }
       }
     ],
@@ -34,14 +34,14 @@
       "editor/title": [
         {
           "when": "resourceLangId == wxml",
-          "command": "extension.trollwxml",
+          "command": "extension.trollwxml.outline",
           "group": "navigation"
         }
       ],
       "explorer/context": [
         {
           "when": "resourceLangId == wxml",
-          "command": "extension.trollwxml",
+          "command": "extension.trollwxml.outline",
           "group": "navigation"
         }
       ]
