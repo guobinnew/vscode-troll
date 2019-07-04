@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.0.10
+* add search bar(Ctrl+F).
+* improvement of element location algorithm when drag&drop.
+* optimzing code.
+
 ## v0.0.8
 * fix a fatal drag&drop bug.
 
