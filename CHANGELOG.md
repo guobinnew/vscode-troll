@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.0.7
+* limit the number of display characters, the length of the text exceeds the part indicated by ellipsis.
+
 ## v0.0.6
 * fix import parsing bug.
 
