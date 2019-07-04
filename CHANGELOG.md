@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.0.11
+* improve search function.
+
 ## v0.0.10
 * add search bar(Ctrl+F).
 * improvement of element location algorithm when drag&drop.
