@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.0.12
+* fix a small search problem.
+
 ## v0.0.11
 * improve search function.
 
