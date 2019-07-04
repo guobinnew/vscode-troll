@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.0.8
+* add search bar(Ctrl+F).
+* improvement of element location algorithm when drag&drop.
+* optimzing code.
+
 ## v0.0.7
 * limit the number of display characters, the length of the text exceeds the part indicated by ellipsis.
 
