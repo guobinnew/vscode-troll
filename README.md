@@ -1,6 +1,6 @@
 # Troll
 
-An visual editor for Quick app(.ux)
+A visual editor for Quick app(.ux)
 
 ## Screenshots
 
