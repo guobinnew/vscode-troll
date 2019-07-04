@@ -22,6 +22,8 @@
             bindtap="bindSpeedTap">
                 <text class="speed-item-text">{{item.title}}</text>
             </view>
+
+            
         </view>
         <view class="answer">
             <text class="answer-text" style="display: {{showAnswer ? 'inline' : 'none'}}">{{word}}</text>
