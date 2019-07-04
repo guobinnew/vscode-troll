@@ -2,7 +2,7 @@
   "name": "troll-ux",
   "displayName": "Troll For Ux",
   "description": "An visual editor for Quick app(.ux)",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "publisher": "orionunique",
   "engines": {
     "vscode": "^1.34.0"

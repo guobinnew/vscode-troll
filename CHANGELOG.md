@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.0.6
+* fix import parsing bug.
+
 ## v0.0.5
 * fix a fatal drag&drop bug.
 

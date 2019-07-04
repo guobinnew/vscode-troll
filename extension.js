@@ -52,11 +52,15 @@ function readUx(uri) {
 	let filepath = uri.fsPath || uri.path
 	res.script = fs.readFileSync(filepath, 'utf-8')
 	const document = parse5.parseFragment(res.script, {sourceCodeLocationInfo: true})
+	res.imports = []
   res.sections = []
 	for(let child of document.childNodes){
 		if (child.tagName === 'template') {
 			res.code = res.script.substring(child.sourceCodeLocation.startOffset, child.sourceCodeLocation.endOffset)
 			res.crc = crc32.str(res.code)
+		} else if (child.tagName === 'import') {
+			// 缓存import
+			res.imports.push(res.script.substring(child.sourceCodeLocation.startOffset, child.sourceCodeLocation.endOffset))
 		} else {
 			// 缓存其余部分
 			res.sections.push(res.script.substring(child.sourceCodeLocation.startOffset, child.sourceCodeLocation.endOffset))
@@ -106,9 +110,14 @@ const messageHandlers = {
 		// 写入文件
 		const writefile = () => {
 			// 只替换<template>部分，其余部分保持原样
-			let source = message.info.code
+			let source = ''
+			for (let i=0; i<res.imports.length; i++) {
+				source +=  res.imports[i] + '\n'
+			}
+			source += message.info.code
+
 			for (let i=0; i<res.sections.length; i++) {
-				source += '\n' + res.sections[i]
+				source += res.sections[i]
 			}
 			// 写入新代码
 			let filepath = context.uri.fsPath || context.uri.path
