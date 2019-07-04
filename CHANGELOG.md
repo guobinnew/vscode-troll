@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.0.21
+* improve search function.
+
 ## v0.0.20
 * add search bar(Ctrl+F).
 

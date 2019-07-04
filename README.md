@@ -1,6 +1,6 @@
 # Troll
 
-An visual editor for vue(2.x)
+A visual editor for vue(2.x)
 
 ## Screenshots
 
