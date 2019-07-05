@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.0.23
+* add Vant UI components.
+
 ## v0.0.21
 * improve search function.
 
