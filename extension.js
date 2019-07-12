@@ -5,6 +5,31 @@ const path = require('path');
 const fs = require('fs');
 const crc32 = require('./libs/crc32');
 const parse5 = require('./libs/parse5/lib/index');
+const exec = require('child_process').exec;
+
+function openURL(url) {
+  let opener
+  switch (process.platform) {
+    case 'darwin':
+      opener = 'open'
+      break
+    case 'win32':
+      opener = 'start'
+			break
+		case 'linux':
+			opener = 'xdg-open'
+			break
+    default:
+			opener = 'default'
+      break
+	}
+	
+	if (opener === 'default') {
+		vscode.env.openExternal(vscode.Uri.parse(url))
+	} else {
+		exec(`${opener} "${url.replace(/"/g, '\\\"')}"`)
+	}
+}
 
 const panelMaps = new Map()
 // this method is called when your extension is activated
@@ -83,7 +108,11 @@ const messageHandlers = {
 		vscode.window.showErrorMessage(message.info)
 	},
 	openurl(context, message) {
-	  vscode.env.openExternal(vscode.Uri.parse(message.info))
+		if (message.info === '') {
+			vscode.window.showErrorMessage('Uri is invalid!')
+			return
+		}
+		openURL(message.info)
 	},
 	opendoc(context, message) {
 		vscode.window.showTextDocument(context.uri)

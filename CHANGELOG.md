@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.0.24
+* add Ant Design UI components.
+
 ## v0.0.23
 * add Vant UI components.
 
